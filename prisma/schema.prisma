@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id                  Int    @id @default(autoincrement())
+  studentName         String @db.VarChar(30)
+  collegeName         String @db.VarChar(50)
+  round1Marks         Float
+  round2Marks         Float
+  round3Marks         Float
+  technicalRoundMarks Float
+  totalMarks          Float  @default(0)
+  result              String @default("Rejected")
+  rank                Int?
+}
