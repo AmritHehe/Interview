@@ -17,5 +17,5 @@ model Student {
   technicalRoundMarks Float
   totalMarks          Float  @default(0)
   result              String @default("Rejected")
-  rank                Int?
+  rank                Int?   
 }

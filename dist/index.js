@@ -20,15 +20,65 @@ const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
+let rankk = 2;
+let hightestNumber = 0;
 app.post("/add-student", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { studentName, collegeName, round1Marks, round2Marks, round3Marks, technicalRoundMarks } = req.body;
     const totalMarks = round1Marks + round2Marks + round3Marks + technicalRoundMarks;
     const result = totalMarks >= 35 ? "Selected" : "Rejected";
+    //rank logic 
+    // if(totalMarks >= hightestNumber){ 
+    //     // console.log("I m inside the logic")
+    //     if(rankk>1){rankk-=1;}
+    //     hightestNumber = totalMarks;
+    // await prisma.student.upsert({ 
+    //     where : { 
+    //         rank : { 
+    //             gt : rankk
+    //         }
+    //     },
+    //     update : { 
+    //         rank : { 
+    //             increment : 1
+    //         }
+    //     }
+    // })
+    // await prisma.student.updateMany({
+    //     // orderBy: { totalMarks: "desc" }
+    //     where : { 
+    //         totalMarks : { 
+    //             lt : totalMarks
+    //         }
+    //     },
+    //     data : { 
+    //         rank : { 
+    //             increment : 1,
+    //         }
+    //     }
+    // })
+    // }
+    // else{ 
+    //     rankk+=1;
+    // }
+    // const rank = rankk;
+    //we can do one more thing , fetch data in desc order as we are doing and update rankings there 
     const student = yield prisma.student.create({
         data: { studentName, collegeName, round1Marks, round2Marks, round3Marks, technicalRoundMarks, totalMarks, result }
     });
-    res.json(student);
+    const students = yield prisma.student.findMany({
+        orderBy: { totalMarks: "desc" },
+        select: { id: true }
+    });
+    // Update all students' ranks dynamically (one query per student)
+    for (let i = 0; i < students.length; i++) {
+        yield prisma.student.update({
+            where: { id: students[i].id },
+            data: { rank: i + 1 }
+        });
+    }
 }));
+// app.post("/updateRank" , async(req , res ) => {
+// });
 app.get("/students", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const students = yield prisma.student.findMany({
         orderBy: { totalMarks: "desc" }
